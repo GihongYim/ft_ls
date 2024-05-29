@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <dirent.h>
 #include "libft.h"
-#include "flag.h"
+
+enum fileType {
+    file,
+    directory,
+};
 
 int main(int argc, char* argv[])
 {
