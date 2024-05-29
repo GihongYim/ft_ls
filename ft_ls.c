@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <dirent.h>
 #include "libft.h"
+#include "flag.h"
 
 int main(int argc, char* argv[])
 {
