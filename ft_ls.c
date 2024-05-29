@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
         dd = readdir(dir);
         if (dd == NULL)
             break;
-        printf("%s\n", dd->d_name);
+        printf("%s ", dd->d_name);
     }
     return 0;
 }
