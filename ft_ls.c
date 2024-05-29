@@ -7,6 +7,7 @@ enum fileType {
     directory,
 };
 
+
 int main(int argc, char* argv[])
 {
     char *target = ".";
@@ -22,6 +23,11 @@ int main(int argc, char* argv[])
         if (dd == NULL)
             break;
         printf("%s ", dd->d_name);
+        printf("i_no :%llu \n", dd->d_ino);
+        printf("namlen: %hu \n", dd->d_namlen);
+        printf("reclen: %hu \n", dd->d_reclen);
+        printf("d_type: %hhu \n", dd->d_type);
+
     }
     return 0;
 }
