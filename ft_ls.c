@@ -44,6 +44,7 @@ int getFiles(struct dirent** files, char *path) {
         dd = readdir(dir);
         if (dd == NULL) break;
         files[index++] = dd;
+        printf("%p\n", files[index - 1]);
     }
     closedir(dir);
     return len;
