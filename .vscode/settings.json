@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.hpp": "cpp",
-        "xattr.h": "c"
+        "xattr.h": "c",
+        "stat.h": "c"
     }
 }

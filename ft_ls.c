@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <sys/dirent.h>
 #include <sys/types.h>
 #include <sys/dir.h>
@@ -28,6 +29,7 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
     DIR *dir = opendir(path);
     struct dirent *curr;
     char *next = NULL;
+
     sort_type = sort_name;
     format = only_file_name;
     while (1) {
@@ -35,9 +37,7 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
         if (curr == NULL)
             break;
         if (!allOption && curr->d_name[0] == '.') continue;
-        if (recursive && curr->d_type == DT_DIR)  {
-            continue;
-        }
+        if (recursive && curr->d_type == DT_DIR) continue;
         printf("%s ", curr->d_name);
     }
     closedir(dir);
