@@ -9,6 +9,9 @@
 #define true 1
 #define false 0
 
+void qsortByName(struct dirent ***files, int left, int right);
+void qsortByTime(struct dirent ***files, int left, int right);
+
 enum format 
 {
     only_file_name,
@@ -24,47 +27,91 @@ enum sort_type
 static int recursive = false;
 static int allOption = false;
 
-int getFiles(struct dirent** files, char *path) {
-    int len = 0;
+int getNumOfFile(char *path) {
+    DIR *dir;
     struct dirent * dd;
-    int index = 0;
+    int len = 0;
 
-    DIR *dir = opendir(path);
-
+    dir = opendir(path);
     while (1) {
         dd = readdir(dir);
         if (dd == NULL) break;
         len++;
     }
     closedir(dir);
-    *files = malloc(sizeof(struct dirent) * len);
+    return len;
+}
+
+int getFiles(struct dirent*** files, char *path) {
+    int len;
+    struct dirent * dd;
+    int index = 0;
+    DIR *dir;
+
+    len = getNumOfFile(path);
+    
+    *files = malloc(sizeof(struct dirent*) * len);
 
     dir = opendir(path);
     for (int i = 0; i < len; i++) {
         dd = readdir(dir);
         if (dd == NULL) break;
-        files[index++] = dd;
-        printf("%p\n", files[index - 1]);
+        (*files)[index++] = dd;
     }
     closedir(dir);
     return len;
 }
 
+void qsortByName(struct dirent*** files, int left, int right) {
+    if (left < right) {
+        int q = partitionByName(files, left, right);
+
+        qsortByName(files, left, q - 1);
+        qsortByName(files, q + 1, right);
+    }
+}
+
+int partitionByName(struct dirent*** files, int left, int right) {
+    struct dirent * pivot;
+    int low, high;
+
+    low = left;
+    high = right + 1;
+    pivot = (*files)[left];
+
+    
+}
+
+void qsortBytime(struct dirent*** files, int left, int right) {
+
+}
+
+
+
+void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_type)
+{
+    switch (sort_type){
+    case sort_name:
+        qsortByName(files, 0, numOfFile - 1);
+    case sort_time:
+        qsortByTime(files, 0, numOfFile - 1);
+    }
+}
+
 void printDir(char *path, enum format format, enum sort_type sort_type) 
 {
     int numOfFile;
-    struct dirent *files = NULL;
+    struct dirent **files = NULL;
 
     numOfFile = getFiles(&files, path);
+    sortFileList(&files, numOfFile, sort_type);
+
     printf("numOfFile: %d\n", numOfFile);
     for (int i = 0; i < numOfFile; i++) {
-        printf("%d: %s\n", i, files[i].d_name);
+        printf("%d: %s\n", i, files[i]->d_name);
     }
-
-    sort_type = sort_name;
     format = only_file_name;
 }
-
 
 int main(int argc, char *argv[])
 {

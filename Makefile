@@ -20,7 +20,7 @@ $(OBJ_DIR) :
 	mkdir -p $(OBJ_DIR)
 
 $(OBJ_DIR)/%.o : %.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(INCLUDE) -c $< -o $@
+	$(CC) -g $(CFLAGS) $(INCLUDE) -c $< -o $@
 
 $(LIBFT) :
 	make -C $(LIBFT_DIR) all
