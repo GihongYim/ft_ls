@@ -4,6 +4,7 @@
 #include <sys/dirent.h>
 #include <sys/types.h>
 #include <sys/dir.h>
+#include <stdlib.h>
 #include "libft.h"
 
 #define true 1
@@ -11,6 +12,7 @@
 
 void qsortByName(struct dirent ***files, int left, int right);
 void qsortByTime(struct dirent ***files, int left, int right);
+int partitionByName(struct dirent*** files, int left, int right);
 
 enum format 
 {
@@ -71,6 +73,26 @@ void qsortByName(struct dirent*** files, int left, int right) {
     }
 }
 
+int ft_strcmp(const char *a, const char *b) {
+    while (*a && *b && *a == *b) {
+        a++;
+        b++;
+    }
+    return (*a > *b) - (*a < *b);
+}
+
+int nameCmp(struct dirent * a, struct dirent * b) {
+        return ft_strcmp(a->d_name, b->d_name);
+}
+
+void dirSwap(struct dirent*** files, int low, int high) {
+    struct dirent * tmp;
+
+    tmp = (*files)[low];
+    (*files)[low] = (*files)[high];
+    (*files)[high] = tmp;
+}
+
 int partitionByName(struct dirent*** files, int left, int right) {
     struct dirent * pivot;
     int low, high;
@@ -79,11 +101,27 @@ int partitionByName(struct dirent*** files, int left, int right) {
     high = right + 1;
     pivot = (*files)[left];
 
-    
+    do {
+        do {
+            low++;
+        } while (low <= right && nameCmp((*files)[low], pivot) < 0);
+
+        do {
+            high--;
+        } while (high >= left && nameCmp((*files)[high], pivot) > 0);
+            
+        if (low < high) {
+            dirSwap(files, low, high);        
+        }
+    } while (low <= high);
+        dirSwap(files, left, high);
+    return high;
 }
 
-void qsortBytime(struct dirent*** files, int left, int right) {
-
+void qsortByTime(struct dirent*** files, int left, int right) {
+    left = 0;
+    right = 0;
+    files = 0;
 }
 
 
@@ -92,9 +130,9 @@ void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_typ
 {
     switch (sort_type){
     case sort_name:
-        qsortByName(files, 0, numOfFile - 1);
+        qsortByName(files, 0, numOfFile - 1); break;
     case sort_time:
-        qsortByTime(files, 0, numOfFile - 1);
+        qsortByTime(files, 0, numOfFile - 1); break;
     }
 }
 
@@ -108,7 +146,9 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
 
     printf("numOfFile: %d\n", numOfFile);
     for (int i = 0; i < numOfFile; i++) {
-        printf("%d: %s\n", i, files[i]->d_name);
+        // printf("%d: %s\n", i, files[i]->d_name);
+        if (files[i]->d_name[0] == '.') continue;
+        printf("%s ", files[i]->d_name);
     }
     format = only_file_name;
 }
