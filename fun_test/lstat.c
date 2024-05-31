@@ -33,24 +33,27 @@ void printTime(struct stat *buf) {
 }
 
 void printFileSize(const char *name, struct stat *buf){      
-        printf("%s size: %ld\n",name, buf->st_size); 
+        printf("%s size: %lld\n",name, buf->st_size); 
 }  
 
 int main() {
-    char filename_dir[128] = "dir";
+//     char filename_dir[128] = "dir";
     char filename_file[128] = "aaa";
+//     struct stat dir;
     struct stat file;
-    struct stat dir;
 
-    lstat(filename_dir, &dir);   
+//     lstat(filename_dir, &dir);   
     lstat(filename_file, &file);
 
-    printType(filename_dir, &dir);
-    printTime(&dir);
-    printFileSize(filename_dir, &dir);
-    printf("\n");
+//     printType(filename_dir, &dir);
+//     printTime(&dir);
+//     printFileSize(filename_dir, &dir);
+//     printf("\n");
 
     printType(filename_file, &file);
     printTime(&file);
     printFileSize(filename_file, &file);
+    printf("st_mode :%d\n", file.st_mode); 
+    printf("\n");
+
 }

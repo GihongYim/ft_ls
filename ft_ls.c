@@ -136,6 +136,31 @@ void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_typ
     }
 }
 
+void printLongFormat(char *file) {
+    struct stat statbuf;
+    char *mode = "xwrxwrxwr";
+    lstat(file, &statbuf);
+
+    if (S_ISDIR(statbuf.st_mode)) {
+        printf("d");
+    } else if (S_ISLNK(statbuf.st_mode)) {
+        printf("l");
+    } else {
+        printf("-");
+    }
+    for (int i = 8; i >= 0; i--) {
+        if ((1 << i) & statbuf.st_mode) {
+            printf("%c", mode[i]);
+        } else {
+            printf("-");
+        }
+    }
+
+
+
+    printf(" %s\n",file);
+}
+
 void printDir(char *path, enum format format, enum sort_type sort_type) 
 {
     int numOfFile;
@@ -145,13 +170,17 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
     sortFileList(&files, numOfFile, sort_type);
 
     if (format == only_file_name) {
-        printf("numOfFile: %d\n", numOfFile);
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.') continue;
             printf("%s ", files[i]->d_name);
         }
+    } else if (format == long_format) {
+        printf("numOfFile: %d\n", numOfFile);
+        for (int i = 0; i < numOfFile; i++) {
+            if (files[i]->d_name[0] == '.') continue;
+            printLongFormat(files[i]->d_name);
+        }
     }
-    format = only_file_name;
 }
 
 int main(int argc, char *argv[])
