@@ -144,11 +144,12 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
     numOfFile = getFiles(&files, path);
     sortFileList(&files, numOfFile, sort_type);
 
-    printf("numOfFile: %d\n", numOfFile);
-    for (int i = 0; i < numOfFile; i++) {
-        // printf("%d: %s\n", i, files[i]->d_name);
-        if (files[i]->d_name[0] == '.') continue;
-        printf("%s ", files[i]->d_name);
+    if (format == only_file_name) {
+        printf("numOfFile: %d\n", numOfFile);
+        for (int i = 0; i < numOfFile; i++) {
+            if (files[i]->d_name[0] == '.') continue;
+            printf("%s ", files[i]->d_name);
+        }
     }
     format = only_file_name;
 }
