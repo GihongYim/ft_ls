@@ -52,9 +52,6 @@ int getFiles(struct dirent** files, char *path) {
 
 void printDir(char *path, enum format format, enum sort_type sort_type) 
 {
-    // DIR *dir = opendir(path);
-    // struct dirent *curr;
-    // char *next = NULL;
     int numOfFile;
     struct dirent *files = NULL;
 
@@ -66,30 +63,6 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
 
     sort_type = sort_name;
     format = only_file_name;
-    // while (1) {
-    //     curr = readdir(dir);
-    //     if (curr == NULL)
-    //         break;
-    //     if (!allOption && curr->d_name[0] == '.') continue;
-    //     if (recursive && curr->d_type == DT_DIR) continue;
-    //     printf("%s ", curr->d_name);
-    // }
-    // closedir(dir);
-    // if (!recursive) return;
-    // dir = opendir(path);
-    // while (1) {
-    //     curr = readdir(dir);
-    //     if (curr == NULL)
-    //         break;
-    //     if (!allOption && curr->d_name[0] == '.') continue;
-    //     if (curr->d_type == DT_DIR)  {
-    //         next = ft_strjoin(path, "/");
-    //         next = ft_strjoin(next, curr->d_name);
-    //         printf("\n");
-    //         printDir(next, format, sort_type);
-    //     }
-    // }
-    // closedir(dir);
 }
 
 
