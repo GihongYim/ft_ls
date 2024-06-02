@@ -143,7 +143,7 @@ void printLongFormat(char *file) {
 
     if (S_ISDIR(statbuf.st_mode)) {
         printf("d");
-    } else if (S_ISLNK(statbuf.st_mode)) {
+    } else if (S_ISLNK(sta`tbuf.st_mode)) {
         printf("l");
     } else {
         printf("-");
