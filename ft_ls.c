@@ -142,20 +142,22 @@ void printLongFormat(char *file) {
     lstat(file, &statbuf);
 
     if (S_ISDIR(statbuf.st_mode)) {
-        printf("d");
+        write(STDOUT_FILENO, "d", 1);
     } else if (S_ISLNK(statbuf.st_mode)) {
-        printf("l");
+        write(STDOUT_FILENO, "l", 1);
     } else {
-        printf("-");
+        write(STDOUT_FILENO, "-", 1);
     }
     for (int i = 8; i >= 0; i--) {
         if ((1 << i) & statbuf.st_mode) {
-            printf("%c", mode[i]);
+            write(STDOUT_FILENO, &mode[i], 1);
         } else {
-            printf("-");
+            write(STDOUT_FILENO, "-", 1);
         }
     }
-    printf(" %s\n",file);
+    write(STDOUT_FILENO, " ", 1);
+    write(STDOUT_FILENO, file, ft_strlen(file));
+    write(STDOUT_FILENO, "\n", 1);
 }
 
 void printDir(char *path, enum format format, enum sort_type sort_type) 
@@ -169,10 +171,13 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
     if (format == only_file_name) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.') continue;
-            printf("%s ", files[i]->d_name);
+            write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
+            write(STDOUT_FILENO, " ", 1);
         }
     } else if (format == long_format) {
-        printf("numOfFile: %d\n", numOfFile);
+        write(STDOUT_FILENO, "numOfFile: ", ft_strlen("numOfFile: "));
+        ft_putnbr_fd(numOfFile, STDOUT_FILENO);
+        ft_putchar_fd('\n', STDOUT_FILENO);
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.') continue;
             printLongFormat(files[i]->d_name);
@@ -210,6 +215,6 @@ int main(int argc, char *argv[])
         }
     }
     printDir(".", format, sort_type);
-    printf("\n");
+    ft_putendl_fd("", STDOUT_FILENO);
     return 0;
 }
