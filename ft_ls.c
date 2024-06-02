@@ -155,9 +155,6 @@ void printLongFormat(char *file) {
             printf("-");
         }
     }
-
-
-
     printf(" %s\n",file);
 }
 
