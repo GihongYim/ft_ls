@@ -79,7 +79,7 @@ $(NAME) :$(OBJ)
 	$(AR) $(ARFLAGS) $@ $^
 
 %.o : %.c libft.h
-	$(CC) $(CFLAGS) -c $< -I libft.h
+	$(CC) $(CFLAGS) -c $< -I .
 
 clean :
 	rm $(RMFLAGS) $(OBJS) $(BONUS_OBJS)

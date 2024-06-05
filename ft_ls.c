@@ -1,11 +1,18 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
-#include <sys/dirent.h>
+
+
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <stdlib.h>
-#include "libft.h"
+// for maxos
+// #include <sys/dirent.h> 
+// #include "libft.h"
+
+// for linux
+#include <dirent.h>
+#include "./libft/libft.h"
 
 #define true 1
 #define false 0
@@ -13,6 +20,7 @@
 void qsortByName(struct dirent ***files, int left, int right);
 void qsortByTime(struct dirent ***files, int left, int right);
 int partitionByName(struct dirent*** files, int left, int right);
+int partitionByTime(struct dirent*** files, int left, int right);
 
 enum format 
 {
@@ -82,7 +90,37 @@ int ft_strcmp(const char *a, const char *b) {
 }
 
 int nameCmp(struct dirent * a, struct dirent * b) {
-        return ft_strcmp(a->d_name, b->d_name);
+    return ft_strcmp(a->d_name, b->d_name);
+}
+
+int timeCmp(struct dirent *a, struct dirent *b) {
+    struct stat abuf;
+    struct stat bbuf;
+
+    time_t        aTime;
+    time_t        bTime;
+
+
+    if (lstat(a->d_name, &abuf) == -1) {
+        perror("lstat");
+        exit(EXIT_FAILURE);
+    }
+
+    if (lstat(b->d_name, &bbuf) == -1) {
+        perror("lstat");
+        exit(EXIT_FAILURE);
+    }
+
+    aTime = abuf.st_mtime;
+    bTime = bbuf.st_mtime;
+
+    if (aTime < bTime) {
+        return -1;
+    } else if (aTime > bTime) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 void dirSwap(struct dirent*** files, int low, int high) {
@@ -93,35 +131,84 @@ void dirSwap(struct dirent*** files, int low, int high) {
     (*files)[high] = tmp;
 }
 
+// int partitionByName(struct dirent*** files, int left, int right) {
+//     struct dirent * pivot;
+//     int low, high;
+
+    // low = left;
+    // high = right + 1;
+    // pivot = (*files)[left];
+
+    // do {
+    //     do {
+    //         low++;
+    //     } while (low <= right && nameCmp((*files)[low], pivot) < 0);
+
+    //     do {
+    //         high--;
+    //     } while (high >= left && nameCmp((*files)[high], pivot) > 0);
+            
+    //     if (low < high) {
+    //         dirSwap(files, low, high);        
+    //     }
+    // } while (low <= high);
+//     dirSwap(files, left, high);
+//     return high;
+// }
+
 int partitionByName(struct dirent*** files, int left, int right) {
     struct dirent * pivot;
     int low, high;
 
     low = left;
-    high = right + 1;
+    high = right;
     pivot = (*files)[left];
 
-    do {
-        do {
+    while (low < high) {
+        while (low <= right && nameCmp((*files)[low], pivot) <= 0) {
             low++;
-        } while (low <= right && nameCmp((*files)[low], pivot) < 0);
-
-        do {
-            high--;
-        } while (high >= left && nameCmp((*files)[high], pivot) > 0);
-            
-        if (low < high) {
-            dirSwap(files, low, high);        
         }
-    } while (low <= high);
-        dirSwap(files, left, high);
+        while (nameCmp((*files)[high], pivot) > 0) {
+            high--;
+        }
+        if (low < high) {
+            dirSwap(files, low, high);
+        }
+    }
+    dirSwap(files, left, high);
     return high;
 }
 
 void qsortByTime(struct dirent*** files, int left, int right) {
-    left = 0;
-    right = 0;
-    files = 0;
+    if (left < right) {
+        int q = partitionByTime(files, left, right);
+
+        qsortByTime(files, left, q - 1);
+        qsortByTime(files, q + 1, right);
+    }
+}
+
+int partitionByTime(struct dirent*** files, int left, int right) {
+    struct dirent * pivot;
+    int low ,high;
+
+    low = left;
+    high = right;
+    pivot = (*files)[left];
+
+    while (low < high) {
+        while (low <= right && nameCmp((*files)[low], pivot) <= 0) {
+            low++;
+        }
+        while (nameCmp((*files)[high], pivot) > 0) {
+            high--;
+        }
+        if (low < high) {
+            dirSwap(files, low, high);
+        }
+    }
+    dirSwap(files, left, high);
+    return high;
 }
 
 
@@ -187,11 +274,11 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
 
 int main(int argc, char *argv[])
 {
-    unsigned int option = 0;
+    // unsigned int option = 0;
     enum format format = only_file_name;
     enum sort_type sort_type = sort_name;
     
-    option = 1;
+    // option = 1;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             int len = ft_strlen(argv[i]);
