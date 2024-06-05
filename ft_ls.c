@@ -226,8 +226,10 @@ void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_typ
 void printLongFormat(char *file) {
     struct stat statbuf;
     char *mode = "xwrxwrxwr";
+    nlink_t numOfLinks;
     lstat(file, &statbuf);
 
+    // file type and permissions
     if (S_ISDIR(statbuf.st_mode)) {
         write(STDOUT_FILENO, "d", 1);
     } else if (S_ISLNK(statbuf.st_mode)) {
@@ -243,6 +245,27 @@ void printLongFormat(char *file) {
         }
     }
     write(STDOUT_FILENO, " ", 1);
+
+    // number of links
+
+    numOfLinks = statbuf.st_nlink;
+
+    ft_putnbr_fd(STDOUT_FILENO, numOfLinks);
+    ft_putchar_fd(' ', STDOUT_FILENO);
+
+    // printf("%ld ", numOfLinks);
+    
+    // write(STDERR_FILENO, )
+    // owner of the fils
+
+
+    // group associated with file
+
+    // file size in bytes
+
+    // last modification data and time
+
+    // file name
     write(STDOUT_FILENO, file, ft_strlen(file));
     write(STDOUT_FILENO, "\n", 1);
 }
