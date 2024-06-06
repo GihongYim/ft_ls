@@ -366,23 +366,22 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     if (recursive) {
         ft_putchar_fd('\n', STDOUT_FILENO);
         for (int i = 0; i < numOfFile; i++) {
-            // if (files[i]->d_name[0] == '.' && allOption == false) continue;
-            if (files[i]->d_name[0] == '.') {
-                if (start == false || allOption == false)
-                    continue;
-            }
-
-
             if (lstat(files[i]->d_name, &fileStat) == -1) {
                 break;
             }
             if (!S_ISDIR(fileStat.st_mode)) continue;
+            if (files[i]->d_name[0] == '.' && allOption == false) 
+                    continue;
+            if (files[i]->d_name[0] == '.' && start == false) 
+                    continue;
+            
             ft_putstr_fd(path, STDOUT_FILENO);
             ft_putchar_fd('/', STDOUT_FILENO);
             write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
             write(STDOUT_FILENO, ":\n", 2);
             extPath = ft_strjoin(path, "/");
             printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type, false);
+            ft_putstr_fd("\n\n", STDOUT_FILENO);
         }
     }
     for (int i = 0; i < numOfFile; i++) {
