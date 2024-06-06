@@ -217,6 +217,26 @@ void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_typ
     }
 }
 
+char *padding(char *str, int len) 
+{
+    int     slen;
+    char*   pad;
+    char*   padded;
+
+    slen = ft_strlen(str);
+    if (slen >= len) {
+        return ft_strdup(str);
+    }
+
+    pad = ft_calloc(sizeof(char), len - slen + 1);
+    ft_memset(pad, ' ', len - slen + 1);
+    pad[len-slen] = '\0';
+
+    padded = ft_strjoin(pad, str);
+
+    free(pad);
+    return padded;
+}
 void printLongFormat(char *file) {
     struct stat     statbuf;
     char            *mode = "xwrxwrxwr";
@@ -225,6 +245,8 @@ void printLongFormat(char *file) {
     struct group    *groupBuf;
     time_t          mtime;
     char            *timeStr;
+    char            *column;
+    char            *padded;
 
     if (lstat(file, &statbuf) == -1) {
         perror("lstat");
@@ -252,25 +274,52 @@ void printLongFormat(char *file) {
 
     numOfLinks = statbuf.st_nlink;
 
-    ft_putnbr_fd(numOfLinks, STDOUT_FILENO);
+    column = ft_itoa(numOfLinks);
+    padded = padding(column, 3);
+    ft_putstr_fd(padded, STDOUT_FILENO);
     ft_putchar_fd(' ', STDOUT_FILENO);
+    free(column);
+    free(padded);
+
+    // ft_putnbr_fd(numOfLinks, STDOUT_FILENO);
+    // ft_putchar_fd(' ', STDOUT_FILENO);
     
     // owner of the files
 
     userBuf = getpwuid(statbuf.st_uid);
-    ft_putstr_fd(userBuf->pw_name, STDOUT_FILENO);
+    padded = padding(userBuf->pw_name, 4);
+    ft_putstr_fd(padded, STDOUT_FILENO);
     ft_putchar_fd(' ', STDOUT_FILENO);
+
+    free(padded);
+
+
+    // ft_putstr_fd(userBuf->pw_name, STDOUT_FILENO);
+    // ft_putchar_fd(' ', STDOUT_FILENO);
 
     // group associated with file
 
     groupBuf = getgrgid(statbuf.st_gid);
-    ft_putstr_fd(groupBuf->gr_name, STDOUT_FILENO);
+    padded = padding(groupBuf->gr_name, 11);
+    ft_putstr_fd(padded, STDOUT_FILENO);
     ft_putchar_fd(' ', STDOUT_FILENO);
+
+    free(padded);
+
+
+    // ft_putstr_fd(groupBuf->gr_name, STDOUT_FILENO);
+    // ft_putchar_fd(' ', STDOUT_FILENO);
     // file size in bytes
 
-    ft_putnbr_fd(statbuf.st_size, STDOUT_FILENO);
+    column = ft_itoa(statbuf.st_size);
+    padded = padding(column, 6);
+    ft_putstr_fd(padded, STDOUT_FILENO);
     ft_putchar_fd(' ' , STDOUT_FILENO);
     
+    free(column);
+
+    // ft_putnbr_fd(statbuf.st_size, STDOUT_FILENO);
+    // ft_putchar_fd(' ' , STDOUT_FILENO);
 
     // last modification data and time
     mtime = statbuf.st_mtime;
