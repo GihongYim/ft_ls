@@ -4,7 +4,9 @@
 #include <sys/types.h>
 #include <sys/dir.h>
 #include <pwd.h>
+#include <grp.h>
 #include <stdlib.h>
+#include <time.h>
 // for maxos
 // #include <sys/dirent.h> 
 // #include "libft.h"
@@ -60,8 +62,16 @@ int getFiles(struct dirent*** files, char *path) {
     len = getNumOfFile(path);
     
     *files = malloc(sizeof(struct dirent*) * len);
+    if (*files == NULL) {
+        perror("malloc");
+        exit(1);
+    }
 
     dir = opendir(path);
+    if (dir == NULL) {
+        free(*files);
+        return -1;
+    }
     for (int i = 0; i < len; i++) {
         dd = readdir(dir);
         if (dd == NULL) break;
@@ -157,7 +167,8 @@ void dirSwap(struct dirent*** files, int low, int high) {
 
 int partitionByName(struct dirent*** files, int left, int right) {
     struct dirent * pivot;
-    int low, high;
+    int             low;
+    int             high;
 
     low = left;
     high = right;
@@ -189,7 +200,8 @@ void qsortByTime(struct dirent*** files, int left, int right) {
 
 int partitionByTime(struct dirent*** files, int left, int right) {
     struct dirent * pivot;
-    int low ,high;
+    int             low;
+    int             high;
 
     low = left;
     high = right;
@@ -223,11 +235,13 @@ void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_typ
 }
 
 void printLongFormat(char *file) {
-    struct stat statbuf;
-    char *mode = "xwrxwrxwr";
-    nlink_t numOfLinks;
-    struct passwd *userBuf;
-
+    struct stat     statbuf;
+    char            *mode = "xwrxwrxwr";
+    nlink_t         numOfLinks;
+    struct passwd   *userBuf;
+    struct group    *groupBuf;
+    time_t          mtime;
+    char            *timeStr;
 
     lstat(file, &statbuf);
 
@@ -263,9 +277,21 @@ void printLongFormat(char *file) {
 
     // group associated with file
 
+    groupBuf = getgrgid(statbuf.st_gid);
+    ft_putstr_fd(groupBuf->gr_name, STDOUT_FILENO);
+    ft_putchar_fd(' ', STDOUT_FILENO);
     // file size in bytes
 
+    ft_putnbr_fd(statbuf.st_size, STDOUT_FILENO);
+    ft_putchar_fd(' ' , STDOUT_FILENO);
+    
+
     // last modification data and time
+    mtime = statbuf.st_mtime;
+    timeStr = ft_substr(ctime(&mtime), 4, 12);
+    ft_putstr_fd(timeStr, STDOUT_FILENO);
+    ft_putchar_fd(' ' , STDOUT_FILENO);
+    free(timeStr);
 
     // file name
     write(STDOUT_FILENO, file, ft_strlen(file));
@@ -299,11 +325,9 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
 
 int main(int argc, char *argv[])
 {
-    // unsigned int option = 0;
     enum format format = only_file_name;
     enum sort_type sort_type = sort_name;
     
-    // option = 1;
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
             int len = ft_strlen(argv[i]);
