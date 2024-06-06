@@ -1,6 +1,6 @@
 NAME = ft_ls
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 LIBFT_DIR = ./libft/
 LIBFT_NAME = libft.a
 LIBFT=$(LIBFT_DIR)$(LIBFT_NAME)
@@ -22,7 +22,7 @@ $(OBJ_DIR) :
 $(OBJ_DIR)/%.o : %.c | $(OBJ_DIR)
 	$(CC) -g $(CFLAGS) $(INCLUDE) -c $< -o $@
 
-$(LIBFT) :
+$(LIBFT) : $(LIBFT_DIR)*.c $(LIBFT_DIR)*.h
 	make -C $(LIBFT_DIR) all
 
 

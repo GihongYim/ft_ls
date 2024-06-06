@@ -2,7 +2,6 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/dir.h>
 #include <pwd.h>
 #include <grp.h>
 #include <stdlib.h>
@@ -75,7 +74,18 @@ int getFiles(struct dirent*** files, char *path) {
     for (int i = 0; i < len; i++) {
         dd = readdir(dir);
         if (dd == NULL) break;
-        (*files)[index++] = dd;
+        (*files)[index] = malloc(sizeof(struct dirent));
+        if ((*files)[index] == NULL) {
+            perror("malloc");
+            closedir(dir);
+            for (int i = 0; i < index; i++) {
+                free((*files)[i]);
+            }
+            free(*files);
+            exit(1);
+        }
+        ft_memcpy((*files)[index], dd, sizeof(struct dirent));
+        index++;
     }
     closedir(dir);
     return len;
@@ -140,31 +150,6 @@ void dirSwap(struct dirent*** files, int low, int high) {
     (*files)[high] = tmp;
 }
 
-// int partitionByName(struct dirent*** files, int left, int right) {
-//     struct dirent * pivot;
-//     int low, high;
-
-    // low = left;
-    // high = right + 1;
-    // pivot = (*files)[left];
-
-    // do {
-    //     do {
-    //         low++;
-    //     } while (low <= right && nameCmp((*files)[low], pivot) < 0);
-
-    //     do {
-    //         high--;
-    //     } while (high >= left && nameCmp((*files)[high], pivot) > 0);
-            
-    //     if (low < high) {
-    //         dirSwap(files, low, high);        
-    //     }
-    // } while (low <= high);
-//     dirSwap(files, left, high);
-//     return high;
-// }
-
 int partitionByName(struct dirent*** files, int left, int right) {
     struct dirent * pivot;
     int             low;
@@ -222,8 +207,6 @@ int partitionByTime(struct dirent*** files, int left, int right) {
     return high;
 }
 
-
-
 void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_type)
 {
     switch (sort_type){
@@ -243,7 +226,10 @@ void printLongFormat(char *file) {
     time_t          mtime;
     char            *timeStr;
 
-    lstat(file, &statbuf);
+    if (lstat(file, &statbuf) == -1) {
+        perror("lstat");
+        exit(1);
+    }
 
     // file type and permissions
     if (S_ISDIR(statbuf.st_mode)) {
@@ -305,7 +291,6 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
 
     numOfFile = getFiles(&files, path);
     sortFileList(&files, numOfFile, sort_type);
-
     if (format == only_file_name) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.') continue;
@@ -313,14 +298,15 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
             write(STDOUT_FILENO, " ", 1);
         }
     } else if (format == long_format) {
-        write(STDOUT_FILENO, "numOfFile: ", ft_strlen("numOfFile: "));
-        ft_putnbr_fd(numOfFile, STDOUT_FILENO);
-        ft_putchar_fd('\n', STDOUT_FILENO);
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.') continue;
             printLongFormat(files[i]->d_name);
         }
     }
+    for (int i = 0; i < numOfFile; i++) {
+        free(files[i]);
+    }
+    free(files);
 }
 
 int main(int argc, char *argv[])
@@ -334,18 +320,19 @@ int main(int argc, char *argv[])
             for (int j = 1; j < len; j++) {
                 switch (argv[i][j]) {
                     case 'l':
-                    format = long_format;
-                    break;
+                        format = long_format;
+                        break;
                     case 'R':
-                    recursive = 1;
-                    break;
+                        recursive = 1;
+                        break;
                     case 'a':
-                    allOption = true;
-                    break;
+                        allOption = true;
+                        break;
                     case 'r':
-                    break;
+                        break;
                     case 't':
-                    break;
+                        sort_type = sort_time;
+                        break;
                 }
             }
         }
