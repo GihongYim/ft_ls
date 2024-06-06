@@ -342,13 +342,13 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
     sortFileList(&files, numOfFile, sort_type);
     if (format == only_file_name) {
         for (int i = 0; i < numOfFile; i++) {
-            if (files[i]->d_name[0] == '.') continue;
+            if (files[i]->d_name[0] == '.' && allOption == false) continue;
             write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
             write(STDOUT_FILENO, " ", 1);
         }
     } else if (format == long_format) {
         for (int i = 0; i < numOfFile; i++) {
-            if (files[i]->d_name[0] == '.') continue;
+            if (files[i]->d_name[0] == '.' && allOption == false) continue;
             printLongFormat(files[i]->d_name);
         }
     }
