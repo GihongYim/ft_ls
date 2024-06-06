@@ -35,6 +35,7 @@ enum sort_type
 };
 
 static int recursive = false;
+static int reverse = false;
 static int allOption = false;
 
 int getNumOfFile(char *path) {
@@ -337,19 +338,45 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
 {
     int numOfFile;
     struct dirent **files = NULL;
+    struct stat fileStat;
+    char *extPath;
 
     numOfFile = getFiles(&files, path);
     sortFileList(&files, numOfFile, sort_type);
     if (format == only_file_name) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
+            // if (lstat(files[i]->d_name, &fileStat) == -1) {
+            //     break;
+            // }
+            // if (recursive && S_ISDIR(fileStat.st_mode)) continue;
             write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
             write(STDOUT_FILENO, " ", 1);
         }
     } else if (format == long_format) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
+            // if (lstat(files[i]->d_name, &fileStat) == -1) {
+            //     break;
+            // }
+            // if (recursive && S_ISDIR(fileStat.st_mode)) continue;
             printLongFormat(files[i]->d_name);
+        }
+    }
+    if (recursive) {
+        ft_putchar_fd('\n', STDOUT_FILENO);
+        for (int i = 0; i < numOfFile; i++) {
+            if (files[i]->d_name[0] == '.' && allOption == false) continue;
+            if (lstat(files[i]->d_name, &fileStat) == -1) {
+                break;
+            }
+            if (!S_ISDIR(fileStat.st_mode)) continue;
+            ft_putstr_fd(path, STDOUT_FILENO);
+            ft_putchar_fd('/', STDOUT_FILENO);
+            write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
+            write(STDOUT_FILENO, ":\n", 2);
+            extPath = ft_strjoin(path, "/");
+            printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type);
         }
     }
     for (int i = 0; i < numOfFile; i++) {
@@ -378,6 +405,7 @@ int main(int argc, char *argv[])
                         allOption = true;
                         break;
                     case 'r':
+                        reverse = true;
                         break;
                     case 't':
                         sort_type = sort_time;
@@ -387,6 +415,6 @@ int main(int argc, char *argv[])
         }
     }
     printDir(".", format, sort_type);
-    ft_putendl_fd("", STDOUT_FILENO);
+    // ft_putendl_fd("", STDOUT_FILENO);
     return 0;
 }
