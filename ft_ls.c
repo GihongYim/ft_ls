@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
-
 #include <sys/types.h>
 #include <sys/dir.h>
+#include <pwd.h>
 #include <stdlib.h>
 // for maxos
 // #include <sys/dirent.h> 
@@ -227,6 +226,9 @@ void printLongFormat(char *file) {
     struct stat statbuf;
     char *mode = "xwrxwrxwr";
     nlink_t numOfLinks;
+    struct passwd *userBuf;
+
+
     lstat(file, &statbuf);
 
     // file type and permissions
@@ -250,14 +252,14 @@ void printLongFormat(char *file) {
 
     numOfLinks = statbuf.st_nlink;
 
-    ft_putnbr_fd(STDOUT_FILENO, numOfLinks);
+    ft_putnbr_fd(numOfLinks, STDOUT_FILENO);
     ft_putchar_fd(' ', STDOUT_FILENO);
-
-    // printf("%ld ", numOfLinks);
     
-    // write(STDERR_FILENO, )
-    // owner of the fils
+    // owner of the files
 
+    userBuf = getpwuid(statbuf.st_uid);
+    ft_putstr_fd(userBuf->pw_name, STDOUT_FILENO);
+    ft_putchar_fd(' ', STDOUT_FILENO);
 
     // group associated with file
 
