@@ -334,7 +334,7 @@ void printLongFormat(char *file) {
     write(STDOUT_FILENO, "\n", 1);
 }
 
-void printDir(char *path, enum format format, enum sort_type sort_type) 
+void printDir(char *path, enum format format, enum sort_type sort_type, int start)
 {
     int numOfFile;
     struct dirent **files = NULL;
@@ -366,7 +366,13 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
     if (recursive) {
         ft_putchar_fd('\n', STDOUT_FILENO);
         for (int i = 0; i < numOfFile; i++) {
-            if (files[i]->d_name[0] == '.' && allOption == false) continue;
+            // if (files[i]->d_name[0] == '.' && allOption == false) continue;
+            if (files[i]->d_name[0] == '.') {
+                if (start == false || allOption == false)
+                    continue;
+            }
+
+
             if (lstat(files[i]->d_name, &fileStat) == -1) {
                 break;
             }
@@ -376,7 +382,7 @@ void printDir(char *path, enum format format, enum sort_type sort_type)
             write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
             write(STDOUT_FILENO, ":\n", 2);
             extPath = ft_strjoin(path, "/");
-            printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type);
+            printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type, false);
         }
     }
     for (int i = 0; i < numOfFile; i++) {
@@ -414,7 +420,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    printDir(".", format, sort_type);
+    printDir(".", format, sort_type, true);
     // ft_putendl_fd("", STDOUT_FILENO);
     return 0;
 }
