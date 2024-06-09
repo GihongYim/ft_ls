@@ -281,9 +281,6 @@ void printLongFormat(char *file) {
     ft_putchar_fd(' ', STDOUT_FILENO);
     free(column);
     free(padded);
-
-    // ft_putnbr_fd(numOfLinks, STDOUT_FILENO);
-    // ft_putchar_fd(' ', STDOUT_FILENO);
     
     // owner of the files
 
@@ -293,10 +290,6 @@ void printLongFormat(char *file) {
     ft_putchar_fd(' ', STDOUT_FILENO);
 
     free(padded);
-
-
-    // ft_putstr_fd(userBuf->pw_name, STDOUT_FILENO);
-    // ft_putchar_fd(' ', STDOUT_FILENO);
 
     // group associated with file
 
@@ -318,9 +311,6 @@ void printLongFormat(char *file) {
     ft_putchar_fd(' ' , STDOUT_FILENO);
     
     free(column);
-
-    // ft_putnbr_fd(statbuf.st_size, STDOUT_FILENO);
-    // ft_putchar_fd(' ' , STDOUT_FILENO);
 
     // last modification data and time
     mtime = statbuf.st_mtime;
@@ -346,20 +336,12 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     if (format == only_file_name) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
-            // if (lstat(files[i]->d_name, &fileStat) == -1) {
-            //     break;
-            // }
-            // if (recursive && S_ISDIR(fileStat.st_mode)) continue;
             write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
             write(STDOUT_FILENO, " ", 1);
         }
     } else if (format == long_format) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
-            // if (lstat(files[i]->d_name, &fileStat) == -1) {
-            //     break;
-            // }
-            // if (recursive && S_ISDIR(fileStat.st_mode)) continue;
             printLongFormat(files[i]->d_name);
         }
     }
@@ -420,6 +402,5 @@ int main(int argc, char *argv[])
         }
     }
     printDir(".", format, sort_type, true);
-    // ft_putendl_fd("", STDOUT_FILENO);
     return 0;
 }
