@@ -6,11 +6,6 @@
 #include <grp.h>
 #include <stdlib.h>
 #include <time.h>
-// for maxos
-// #include <sys/dirent.h> 
-// #include "libft.h"
-
-// for linux
 #include <dirent.h>
 #include "./libft/libft.h"
 
@@ -37,6 +32,10 @@ enum sort_type
 static int recursive = false;
 static int reverse = false;
 static int allOption = false;
+int linkWidth = 0;
+int userNameWidth = 0;
+int groupNameWidth = 0;
+int sizeWidth = 0;
 
 int getNumOfFile(char *path) {
     DIR *dir;
@@ -218,7 +217,7 @@ void sortFileList(struct dirent*** files, int numOfFile, enum sort_type sort_typ
     }
 }
 
-char *padding(char *str, int len) 
+char *padding(char *str, int len, char *option)
 {
     int     slen;
     char*   pad;
@@ -233,12 +232,14 @@ char *padding(char *str, int len)
     ft_memset(pad, ' ', len - slen + 1);
     pad[len-slen] = '\0';
 
-    padded = ft_strjoin(pad, str);
-
+    if (ft_strcmp(option, "left") == 0)
+        padded = ft_strjoin(str, pad);
+    else
+        padded = ft_strjoin(pad, str);
     free(pad);
     return padded;
 }
-void printLongFormat(char *file) {
+void printLongFormat(char *dir, char *file) {
     struct stat     statbuf;
     char            *mode = "xwrxwrxwr";
     nlink_t         numOfLinks;
@@ -248,8 +249,11 @@ void printLongFormat(char *file) {
     char            *timeStr;
     char            *column;
     char            *padded;
+    char            *absPath;
 
-    if (lstat(file, &statbuf) == -1) {
+    absPath = ft_strjoin(dir, file);
+
+    if (lstat(absPath, &statbuf) == -1) {
         perror("lstat");
         exit(1);
     }
@@ -269,46 +273,40 @@ void printLongFormat(char *file) {
             write(STDOUT_FILENO, "-", 1);
         }
     }
-    write(STDOUT_FILENO, " ", 1);
+    write(STDOUT_FILENO, "  ", 1);
 
     // number of links
 
     numOfLinks = statbuf.st_nlink;
 
     column = ft_itoa(numOfLinks);
-    padded = padding(column, 3);
+    padded = padding(column, linkWidth + 1, "right");
     ft_putstr_fd(padded, STDOUT_FILENO);
     ft_putchar_fd(' ', STDOUT_FILENO);
+
     free(column);
     free(padded);
     
     // owner of the files
 
     userBuf = getpwuid(statbuf.st_uid);
-    padded = padding(userBuf->pw_name, 4);
+    padded = padding(userBuf->pw_name, userNameWidth + 2, "left");
     ft_putstr_fd(padded, STDOUT_FILENO);
-    ft_putchar_fd(' ', STDOUT_FILENO);
 
     free(padded);
 
     // group associated with file
 
     groupBuf = getgrgid(statbuf.st_gid);
-    padded = padding(groupBuf->gr_name, 11);
+    padded = padding(groupBuf->gr_name, groupNameWidth + 1, "left");
     ft_putstr_fd(padded, STDOUT_FILENO);
-    ft_putchar_fd(' ', STDOUT_FILENO);
 
     free(padded);
 
-
-    // ft_putstr_fd(groupBuf->gr_name, STDOUT_FILENO);
-    // ft_putchar_fd(' ', STDOUT_FILENO);
-    // file size in bytes
-
     column = ft_itoa(statbuf.st_size);
-    padded = padding(column, 6);
+    padded = padding(column, sizeWidth + 1, "right");
     ft_putstr_fd(padded, STDOUT_FILENO);
-    ft_putchar_fd(' ' , STDOUT_FILENO);
+    ft_putchar_fd(' ', STDOUT_FILENO);
     
     free(column);
 
@@ -316,12 +314,69 @@ void printLongFormat(char *file) {
     mtime = statbuf.st_mtime;
     timeStr = ft_substr(ctime(&mtime), 4, 12);
     ft_putstr_fd(timeStr, STDOUT_FILENO);
-    ft_putchar_fd(' ' , STDOUT_FILENO);
+    ft_putchar_fd(' ', STDOUT_FILENO);
     free(timeStr);
 
     // file name
     write(STDOUT_FILENO, file, ft_strlen(file));
     write(STDOUT_FILENO, "\n", 1);
+    free(absPath);
+}
+
+void setWidth(char *path)
+{
+    DIR             *dir;
+    struct dirent   *dd;
+    struct stat     fileStat;
+    char            *str;
+    int             lengthOfStr;
+    struct passwd   *userBuf;
+    struct group    *groupBuf;
+    char            *folderPath;
+    char            *filePath;
+
+    dir = opendir(path);
+    if (dir == NULL) {
+        perror("opendir");
+        return;
+    }
+    folderPath = ft_strjoin(path, "/");
+    while (1) {
+        dd = readdir(dir);
+        if (dd == NULL) break;
+        filePath = ft_strjoin(folderPath, dd->d_name);
+        if (lstat(filePath, &fileStat) == -1) {
+            perror(dd->d_name);
+            free(folderPath);
+            exit(EXIT_FAILURE);
+        }
+        free(filePath);
+        str = ft_itoa(fileStat.st_nlink);
+        lengthOfStr = ft_strlen(str);
+        if (lengthOfStr > linkWidth) {
+            linkWidth = lengthOfStr;
+        }
+        free(str);
+        userBuf = getpwuid(fileStat.st_uid);
+        lengthOfStr = ft_strlen(userBuf->pw_name);
+        if (lengthOfStr > userNameWidth) {
+            userNameWidth = lengthOfStr;
+        }
+
+        groupBuf = getgrgid(fileStat.st_gid);
+        lengthOfStr = ft_strlen(groupBuf->gr_name);
+        if (lengthOfStr > groupNameWidth) {
+            groupNameWidth = lengthOfStr;
+        }
+
+        str = ft_itoa(fileStat.st_size);
+        lengthOfStr = ft_strlen(str);
+        if (lengthOfStr > sizeWidth) {
+            sizeWidth = lengthOfStr;
+        }
+        free(str);
+    }
+    free(folderPath);
 }
 
 void printDir(char *path, enum format format, enum sort_type sort_type, int start)
@@ -330,6 +385,8 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     struct dirent **files = NULL;
     struct stat fileStat;
     char *extPath;
+    char *folderPath;
+    // char *absPath;
 
     numOfFile = getFiles(&files, path);
     sortFileList(&files, numOfFile, sort_type);
@@ -340,10 +397,15 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
             write(STDOUT_FILENO, " ", 1);
         }
     } else if (format == long_format) {
+        setWidth(path);
+        folderPath = ft_strjoin(path, "/");
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
-            printLongFormat(files[i]->d_name);
+            // absPath = ft_strjoin(folderPath, files[i]->d_name);
+            printLongFormat(folderPath, files[i]->d_name);
+            // free(absPath);
         }
+        free(folderPath);
     }
     if (recursive) {
         ft_putchar_fd('\n', STDOUT_FILENO);
@@ -376,6 +438,7 @@ int main(int argc, char *argv[])
 {
     enum format format = only_file_name;
     enum sort_type sort_type = sort_name;
+    char *path = NULL;
     
     for (int i = 1; i < argc; i++) {
         if (argv[i][0] == '-') {
@@ -401,6 +464,21 @@ int main(int argc, char *argv[])
             }
         }
     }
-    printDir(".", format, sort_type, true);
+    if (argc >= 2 && argv[argc - 1][0] != '-') {
+        path = ft_strdup(argv[argc - 1]);
+    }
+    if (path == NULL) {
+        printDir(".", format, sort_type, true);
+    } else {
+        DIR *dir;
+
+        dir = opendir(path);
+        if (dir == NULL) {
+            perror("ls");
+        } else {
+            printDir(path, format, sort_type, true);
+        }
+        free(path);
+    }
     return 0;
 }
