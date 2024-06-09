@@ -425,6 +425,8 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
             ft_putstr_fd(":\n", STDOUT_FILENO);
             extPath = ft_strjoin(path, "/");
             printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type, false);
+            if (i != numOfFile - 1)
+                ft_putchar_fd('\n', STDOUT_FILENO);
         }
     }
     for (int i = 0; i < numOfFile; i++) {
