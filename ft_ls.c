@@ -260,20 +260,22 @@ void printLongFormat(char *dir, char *file) {
 
     // file type and permissions
     if (S_ISDIR(statbuf.st_mode)) {
-        write(STDOUT_FILENO, "d", 1);
+        ft_putchar_fd('d', STDOUT_FILENO);
     } else if (S_ISLNK(statbuf.st_mode)) {
-        write(STDOUT_FILENO, "l", 1);
+        ft_putchar_fd('l', STDOUT_FILENO);
     } else {
-        write(STDOUT_FILENO, "-", 1);
+        ft_putchar_fd('-', STDOUT_FILENO);
+
     }
     for (int i = 8; i >= 0; i--) {
         if ((1 << i) & statbuf.st_mode) {
-            write(STDOUT_FILENO, &mode[i], 1);
+            ft_putchar_fd(mode[i], STDOUT_FILENO);
         } else {
-            write(STDOUT_FILENO, "-", 1);
+            ft_putchar_fd('-', STDOUT_FILENO);
         }
+    
     }
-    write(STDOUT_FILENO, "  ", 1);
+    ft_putchar_fd(' ', STDOUT_FILENO);
 
     // number of links
 
@@ -318,8 +320,8 @@ void printLongFormat(char *dir, char *file) {
     free(timeStr);
 
     // file name
-    write(STDOUT_FILENO, file, ft_strlen(file));
-    write(STDOUT_FILENO, "\n", 1);
+    ft_putstr_fd(file, STDOUT_FILENO);
+    ft_putchar_fd('\n', STDOUT_FILENO);
     free(absPath);
 }
 
@@ -393,17 +395,15 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     if (format == only_file_name) {
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
-            write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
-            write(STDOUT_FILENO, " ", 1);
+            ft_putstr_fd(files[i]->d_name, STDOUT_FILENO);
+            ft_putchar_fd(' ', STDOUT_FILENO);
         }
     } else if (format == long_format) {
         setWidth(path);
         folderPath = ft_strjoin(path, "/");
         for (int i = 0; i < numOfFile; i++) {
             if (files[i]->d_name[0] == '.' && allOption == false) continue;
-            // absPath = ft_strjoin(folderPath, files[i]->d_name);
             printLongFormat(folderPath, files[i]->d_name);
-            // free(absPath);
         }
         free(folderPath);
     }
@@ -421,11 +421,10 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
             
             ft_putstr_fd(path, STDOUT_FILENO);
             ft_putchar_fd('/', STDOUT_FILENO);
-            write(STDOUT_FILENO, files[i]->d_name, ft_strlen(files[i]->d_name));
-            write(STDOUT_FILENO, ":\n", 2);
+            ft_putstr_fd(files[i]->d_name, STDOUT_FILENO);
+            ft_putstr_fd(":\n", STDOUT_FILENO);
             extPath = ft_strjoin(path, "/");
             printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type, false);
-            ft_putstr_fd("\n\n", STDOUT_FILENO);
         }
     }
     for (int i = 0; i < numOfFile; i++) {
