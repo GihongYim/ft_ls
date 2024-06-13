@@ -388,7 +388,6 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     struct stat fileStat;
     char *extPath;
     char *folderPath;
-    // char *absPath;
 
     numOfFile = getFiles(&files, path);
     sortFileList(&files, numOfFile, sort_type);
@@ -410,8 +409,10 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     if (recursive) {
         ft_putchar_fd('\n', STDOUT_FILENO);
         for (int i = 0; i < numOfFile; i++) {
+            // lstat(files[i]->d_name, &fileStat);
             if (lstat(files[i]->d_name, &fileStat) == -1) {
-                break;
+                // perror(files[i]->d_name);
+                continue;
             }
             if (!S_ISDIR(fileStat.st_mode)) continue;
             if (files[i]->d_name[0] == '.' && allOption == false) 
@@ -475,7 +476,10 @@ int main(int argc, char *argv[])
 
         dir = opendir(path);
         if (dir == NULL) {
-            perror("ls");
+            char *errorMessage = NULL;
+            errorMessage = ft_strjoin("ft_ls:", path);
+            perror(errorMessage);
+            free(errorMessage);
         } else {
             printDir(path, format, sort_type, true);
         }
