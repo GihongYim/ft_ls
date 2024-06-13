@@ -390,7 +390,6 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     int             numOfFile;
     struct dirent   **files = NULL;
     struct stat     fileStat;
-    // char            *extPath;
     char            *folderPath;
     char            *filePath;
 
