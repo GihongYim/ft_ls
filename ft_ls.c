@@ -438,7 +438,6 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
             ft_putstr_fd(files[i]->d_name, STDOUT_FILENO);
             ft_putstr_fd(":\n", STDOUT_FILENO);
             printDir(ft_strjoin(folderPath, files[i]->d_name), format, sort_type, false);
-            perror("ft_ls");
             if (i != numOfFile - 1)
                 ft_putchar_fd('\n', STDOUT_FILENO);
             free(filePath);
