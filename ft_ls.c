@@ -383,11 +383,12 @@ void setWidth(char *path)
 
 void printDir(char *path, enum format format, enum sort_type sort_type, int start)
 {
-    int numOfFile;
-    struct dirent **files = NULL;
-    struct stat fileStat;
-    char *extPath;
-    char *folderPath;
+    int             numOfFile;
+    struct dirent   **files = NULL;
+    struct stat     fileStat;
+    // char            *extPath;
+    char            *folderPath;
+    char            *filePath;
 
     numOfFile = getFiles(&files, path);
     sortFileList(&files, numOfFile, sort_type);
@@ -408,27 +409,37 @@ void printDir(char *path, enum format format, enum sort_type sort_type, int star
     }
     if (recursive) {
         ft_putchar_fd('\n', STDOUT_FILENO);
+        folderPath = ft_strjoin(path, "/");
         for (int i = 0; i < numOfFile; i++) {
-            // lstat(files[i]->d_name, &fileStat);
-            if (lstat(files[i]->d_name, &fileStat) == -1) {
-                // perror(files[i]->d_name);
+            filePath = ft_strjoin(folderPath, files[i]->d_name);
+            if (stat(filePath, &fileStat) == -1) {
+                perror(files[i]->d_name);
+                free(filePath);
                 continue;
             }
-            if (!S_ISDIR(fileStat.st_mode)) continue;
-            if (files[i]->d_name[0] == '.' && allOption == false) 
-                    continue;
-            if (files[i]->d_name[0] == '.' && start == false) 
-                    continue;
+            if (!S_ISDIR(fileStat.st_mode)) {
+                free(filePath);
+                continue;
+            }
+            if (files[i]->d_name[0] == '.' && allOption == false) {
+                free(filePath);
+                continue;
+            }
+            if (files[i]->d_name[0] == '.' && start == false) {
+                free(filePath);
+                continue;
+            }
             
             ft_putstr_fd(path, STDOUT_FILENO);
             ft_putchar_fd('/', STDOUT_FILENO);
             ft_putstr_fd(files[i]->d_name, STDOUT_FILENO);
             ft_putstr_fd(":\n", STDOUT_FILENO);
-            extPath = ft_strjoin(path, "/");
-            printDir(ft_strjoin(extPath, files[i]->d_name), format, sort_type, false);
+            printDir(ft_strjoin(folderPath, files[i]->d_name), format, sort_type, false);
             if (i != numOfFile - 1)
                 ft_putchar_fd('\n', STDOUT_FILENO);
+            free(filePath);
         }
+        free(folderPath);
     }
     for (int i = 0; i < numOfFile; i++) {
         free(files[i]);
