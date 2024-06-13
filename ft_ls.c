@@ -39,10 +39,13 @@ int sizeWidth = 0;
 
 int getNumOfFile(char *path) {
     DIR *dir;
-    struct dirent * dd;
+    struct dirent * dd = NULL;
     int len = 0;
 
     dir = opendir(path);
+    if (dir == NULL) {
+        return -1;
+    }
     while (1) {
         dd = readdir(dir);
         if (dd == NULL) break;
@@ -59,7 +62,8 @@ int getFiles(struct dirent*** files, char *path) {
     DIR *dir;
 
     len = getNumOfFile(path);
-    
+    if (len == -1)
+        return -1;
     *files = malloc(sizeof(struct dirent*) * len);
     if (*files == NULL) {
         perror("malloc");
